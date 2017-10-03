@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {% load leaflet_tags %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <meta charset="UTF-8">
+    <title>GEO_Reporter</title>
+    <style>
+        #gis{height:500px;margin:40px;}
+    </style>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+
+    <!--<link type="text/css" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />-->
+     <link type="text/css" href="{% static 'geodjango/css/bootstrap.min.css' %}" />
+    <link type="text/css" href="{% static 'geodjango/css/leaflet-routing-machine.css' %}" />
+    <link type="text/css" href="{% static 'geodjango/css/leaflet.groupedlayercontrol.css'%}"/>
+    <link type="text/css" href="{% static 'geodjango/css/leaflet.groupedlayercontrol.min.css'%}"/>
+    <script src="{% static 'geodjango/js/leaflet.ajax.js'%}"></script>
+    <script src="{% static 'geodjango/js/leaflet.groupedlayercontrol.js'%}"></script>
+    <script src="{% static 'geodjango/js/leaflet.groupedlayercontrol.min.js'%}"></script>
+    <!--<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>-->
+    <script src="{% static 'geodjango/js/leaflet-routing-machine.js'%}"></script>
+    <!--MORRIS chart essentials-->
+
+    <link rel="stylesheet" href="http://cdn.oesmith.co.uk/morris-0.4.3.min.css">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+        <script src="http://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+
+		<div style="background-color:#38ACEC; height:100px;border-radius:20px;padding-top:20px">
+
+
+            <center><h1 style="color:white">GeoReporter</h1></center>
+
+
+		</div>
+
+
+
+    <!--the function retreives the dataset at the url county in ajax form and in geojson -->
+    <!--format(the way it was stored the add dataset to map-->
+    <script type="text/javascript">
+       function our_layers(map,options){
+		var osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 19,
+				attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			});
+		var OpenTopoMap = L.tileLayer('http://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+			maxZoom: 17,
+			attribution: 'Map data: &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+		});
+		var datasets = new L.GeoJSON.AJAX("{% url 'county' %}",{
+			style: function colors(feature){
+				switch(feature.properties.counties){
+					case 'MACHAKOS':
+						return{
+							color: 'orange',
+							fillOpacity: 0.8
+						};
+					break;
+					case 'KERICHO':
+						return{
+							color: 'purple',
+							fillOpacity: 0.8
+						};
+					break;
+					case 'NAIROBI':
+						return{
+							color: 'blue',
+							fillOpacity: 0.8
+						};
+					break;
+
+				}
+			},
+			onEachFeature: function(feature,layer){
+				layer.bindPopup(feature.properties.counties.toString());
+			}
+
+		});
+
+
+           var point_BAD = new L.GeoJSON.AJAX("{% url 'incidence' 1 %}",{
+			pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: "{% static 'geodjango/img/green.png'%}",
+                        iconSize: [24, 28],
+                        iconAnchor: [12, 28],
+                        popupAnchor: [0, -25]
+                    }),
+                    title: feature.properties.NAME,
+                    riseOnHover: true
+                });
+            },
+			onEachFeature: function(feature,layer){
+				layer.bindPopup(feature.properties.nature.toString()+ " "+feature.properties.description.toString());
+			}
+
+		});
+
+var point_MOD = new L.GeoJSON.AJAX("{% url 'incidence' 2 %}",{
+			pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: "{% static 'geodjango/img/marker.png'%}",
+                        iconSize: [24, 28],
+                        iconAnchor: [12, 28],
+                        popupAnchor: [0, -25]
+                    }),
+                    title: feature.properties.NAME,
+                    riseOnHover: true
+                });
+            },
+			onEachFeature: function(feature,layer){
+				layer.bindPopup(feature.properties.nature.toString()+ " "+feature.properties.description.toString());
+			}
+
+		});
+
+
+var point_WORSE = new L.GeoJSON.AJAX("{% url 'incidence' 3 %}",{
+			pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: "{% static 'geodjango/img/red.png'%}",
+                        iconSize: [24, 28],
+                        iconAnchor: [12, 28],
+                        popupAnchor: [0, -25]
+                    }),
+                    title: feature.properties.NAME,
+                    riseOnHover: true
+                });
+            },
+			onEachFeature: function(feature,layer){
+				layer.bindPopup(feature.properties.nature.toString()+ " "+feature.properties.description.toString());
+			}
+
+		});
+
+		datasets.addTo(map);
+		point_BAD.addTo(map);
+		point_MOD.addTo(map);
+	    point_WORSE.addTo(map);
+
+
+		var baseLayers = {
+			"OSM": osm,
+			"OpenTopoMap":OpenTopoMap
+		}
+
+		 var groupedOverlays = {
+  "Political Boundaries": {
+    "Counties": datasets,
+
+  },
+  "Severity of Report": {
+    "COLLAPSED": point_WORSE,
+    "UNSAFE": point_MOD,
+    "BAD": point_BAD
+
+
+  }
+};
+
+		L.control.groupedLayers(baseLayers, groupedOverlays).addTo(map);
+
+		var routing =  L.Routing.control({
+		  waypoints: [
+		    L.latLng(-0.23, 36.87),
+		    L.latLng(0.23, 37.64)
+		  ]
+		});
+
+		L.easyButton('fa-compass',
+		  function (){
+		    $('.leaflet-routing-container').is(':visible') ? routing.removeFrom(map) : routing.addTo(map)
+		  },
+		  'Routing'
+		).addTo(map);
+
+
+		function createButton(label, container) {
+		    var btn = L.DomUtil.create('button', '', container);
+		    btn.setAttribute('type', 'button');
+		    btn.innerHTML = label;
+		    return btn;
+		}
+
+	}
+
+    </script>
+
+
+<div class="row" style="margin-top:20px">
+                <div class="col-lg-8" >
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>GEO MAP
+
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            {%leaflet_map "gis" callback="window.our_layers "%}
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    </div>
+
+    <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>MAP LEGEND
+
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <span><img src="{% static 'geodjango/img/red.png'%}" style="height:40px;margin-bottom:10px"/>
+                                Collapsed Buildings-
+                            </span><br/>
+                            <span><img src="{% static 'geodjango/img/marker.png'%}" style="height:40px;margin-bottom:10px"/>
+                                Structurally unsafe buildings
+                            </span><br/>
+                            <span><img src="{% static 'geodjango/img/green.png'%}" style="height:40px;margin-bottom:10px"/>
+                                Buildings that do not abide by the set building regulations
+                            </span><br/>
+                    </div>
+         </div>
+
+         <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i>SEVERITY DISTRIBUTION
+
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                             <div id="donut_chart" class="well">
+                                    <center>
+                                <div id="hrcrwNXtmk" style="width: 300px; height: 300px;"></div>
+                                   <script type="text/javascript">
+                                           Morris.Donut({
+                                           element: 'hrcrwNXtmk',
+                                           data: {{ chart1.get_data_json|safe }}
+                                           });
+                                            </script>
+                                        </center>
+                             </div>
+                    </div>
+         </div>
+</div>
+</div>
+</body>
+</html>

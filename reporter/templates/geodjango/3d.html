@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel=”stylesheet” type=”text/css” href=”https://unpkg.com/leaflet@1.0.3/dist/leaflet.css”>
+    <script type=”text/javascript” src=”https://cdn-webgl.eegeo.com/eegeojs/api/v0.1.780/eegeo.js”></script>
+
+</head>
+<body>
+{{ lat }},{{ long }}
+<script type=”text/javascript”>
+
+var map = L.eeGeo.map(‘map’,’ee8527b388ebd47db75a67d7caf519e6′,{
+center: [{{lat }}, {{ long }}],
+zoom:14
+});
+</script>
+<div id=”map” style=”height: 700px;”></div>
+</body>
+</html>
