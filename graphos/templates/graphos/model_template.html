@@ -7,7 +7,6 @@ $(function () {
     function getRandomData() {
         if (data.length > 0)
             data = data.slice(1);
-
         // do a random walk
         while (data.length < totalPoints) {
             var prev = data.length > 0 ? data[data.length - 1] : 50;
